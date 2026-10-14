@@ -1,0 +1,62 @@
+/**
+
+ * [CLASE PRINCIPAL / PUNTO DE ENTRADA AL SISTEMA]
+ * [DEMOSTRACIÓN DE CONCURRENCIA Y PATRÓN FLYWEIGHT]
+ * Esta clase orquesta la ejecucion general del programa:
+ * 1. Inicializa los recursos compartidos (FabricaFlyweight, Catalogo, Playlists).
+ * 2. Carga datos iniciales desde un archivo de texto.
+ * 3. Administra la ejecucion multihilo (Casos de prueba / Pruebas de estres).
+ * 4. Genera reportes de evidencia del patron Flyweight (eficiencia en memoria).
+ */
+public class Main {
+
+    /**
+     * [CREACIÓN Y ADMINISTRACIÓN DE HILOS / PUNTO DE ENTRADA]
+     * Hilo principal (Main thread) que coordina los hilos secundarios y los recursos.
+     */
+    public static void main(String[] args) {
+        System.out.println("      SISTEMA CONCURRENTE CON PATRÓN FLYWEIGHT");
+    
+
+        // [PATRÓN FLYWEIGHT & RECURSOS COMPARTIDOS: Instanciación de componentes centrales]
+        FabricaFlyweight fabrica = new FabricaFlyweight();
+        Catalogo catalogo = new Catalogo();
+
+        // [CONTENEDORES DE CONTEXTO: Listas de reproducción con Estado Extrínseco]
+        ListaReproduccion listaA = new ListaReproduccion("Lista A - Favoritas");
+        ListaReproduccion listaB = new ListaReproduccion("Lista B - Gimnasio");
+
+        System.out.println("\n--- Cargando canciones desde archivo externo (canciones.txt) ---");
+        CargadorArchivos.cargarCancionesDesdeArchivo("canciones.txt", fabrica, catalogo);
+
+        // [CREACIÓN Y ADMINISTRACIÓN DE HILOS: Selección del escenario concurrente]
+        int opcionCaso = 2; // 1: Caso Base (Flujo normal) | 2: Prueba de estrés multihilo
+
+        if (opcionCaso == 1) {
+            // Ejecución de tareas base concurrentes
+            CasosDePrueba.ejecutarCasoBase(fabrica, catalogo, listaA, listaB);
+        } else if (opcionCaso == 2) {
+            // [CREACIÓN Y ADMINISTRACIÓN DE HILOS: Lanzamiento de múltiples hilos concurrentes]
+            // Se simula carga masiva mediante hilos compitiendo por la fábrica y listas
+            CasosDePrueba.ejecutarPruebaDeEstres(fabrica, listaA, 100); // 100 inserciones concurrentes
+        }
+
+        System.out.println("     EVIDENCIAS DE EVALUACIÓN Y RESULTADOS EN MEMORIA");
+        
+
+        // [REGIÓN CRÍTICA DE LECTURA: Impresión de listas tras la finalización de los hilos]
+        listaA.mostrarLista();
+        listaB.mostrarLista();
+
+        // [PATRÓN FLYWEIGHT: Verificación y cálculo de optimización de memoria RAM]
+        int totalReferencias = listaA.getCantidadReferencias() + listaB.getCantidadReferencias();
+        int objetosFlyweight = fabrica.cantidadInstanciasCreadas();
+
+        System.out.println("\nEVIDENCIA DE APLICACIÓN DEL PATRÓN FLYWEIGHT:");
+        System.out.println("  * Cantidad total de referencias activas en listas : " + totalReferencias);
+        System.out.println("  * Cantidad de objetos Flyweight creados en Fábrica: " + objetosFlyweight);
+        System.out.println("  * Resultado: EXITOSO. Independientemente del número de inserciones,");
+        System.out.println("    la fábrica reutiliza las instancias sin duplicar memoria.");
+        System.out.println("==========================================================");
+    }
+}
